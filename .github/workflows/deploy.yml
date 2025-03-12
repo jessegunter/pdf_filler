@@ -1,0 +1,34 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main  # Runs on every push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_KEY }}
+
+      - name: Set Up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+
+      - name: Build and Push Docker Image
+        run: |
+          gcloud builds submit --tag gcr.io/demoproject-453513/pdf-filler
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy pdf-filler \
+            --image gcr.io/demoproject-453513/pdf-filler \
+            --platform managed \
+            --region us-central1 \
+            --allow-unauthenticated
