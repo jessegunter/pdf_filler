@@ -1,0 +1,6 @@
+Flask
+gspread
+pandas
+oauth2client
+pypdf
+gunicorn
