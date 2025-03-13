@@ -4,6 +4,8 @@ import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import NameObject
+import os
+import json
 
 app = Flask(__name__)
 
@@ -16,7 +18,8 @@ def pdf_filler_tool():
     try:
         # --- Google Sheets Setup ---
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+        service_account_info = json.loads(os.environ["GOOGLE_CREDENTIALS"])
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
         client = gspread.authorize(creds)
 
         # Open the Google Sheet
