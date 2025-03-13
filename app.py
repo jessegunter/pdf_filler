@@ -19,7 +19,8 @@ def home():
 def pdf_filler_tool():
     try:
         # --- Google Sheets Setup ---
-        service_account_info = json.loads(base64.b64decode(os.environ["GOOGLE_CREDENTIALS"]).decode("utf-8"))
+        decoded_creds = base64.b64decode(os.environ["GOOGLE_CREDENTIALS"]).decode("utf-8")
+        service_account_info = json.loads(decoded_creds)
 
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
