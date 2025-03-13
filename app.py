@@ -6,6 +6,8 @@ from pypdf import PdfReader, PdfWriter
 from pypdf.generic import NameObject
 import os
 import json
+import base64
+
 
 app = Flask(__name__)
 
@@ -17,8 +19,9 @@ def home():
 def pdf_filler_tool():
     try:
         # --- Google Sheets Setup ---
+        service_account_info = json.loads(base64.b64decode(os.environ["GOOGLE_CREDENTIALS"]).decode("utf-8"))
+
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        service_account_info = json.loads(os.environ["GOOGLE_CREDENTIALS"])
         creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
         client = gspread.authorize(creds)
 
