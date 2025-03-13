@@ -19,24 +19,32 @@ def home():
 def pdf_filler_tool():
     try:
         # --- Google Sheets Setup ---
+        print("Decoding credentials...")
         decoded_creds = base64.b64decode(os.environ["GOOGLE_CREDENTIALS"]).decode("utf-8")
         service_account_info = json.loads(decoded_creds)
 
         scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
         creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
         client = gspread.authorize(creds)
+        print("Authorized with Google Sheets.")
 
         # Open the Google Sheet
-        sheet = client.open("autofill").sheet1
+        print("Opening Google Sheet 'autofill'...")
+        sheet_obj = client.open("autofill")
+        print("Google Sheet object:", sheet_obj)
+        sheet = sheet_obj.sheet1
+        print("Using sheet1:", sheet)
 
         # Read data into a Pandas DataFrame
         data = sheet.get_all_records()
+        print("Data retrieved from sheet:", data)
         df = pd.DataFrame(data)
         if df.empty:
             return jsonify({"error": "No data found in the Google Sheet."}), 400
 
         # --- Select the Most Recent Row ---
         row = df.iloc[-1]
+        print("Most recent row data:", row.to_dict())
 
         # --- Map Google Sheet Columns to PDF Fields ---
         fields = {
@@ -65,11 +73,13 @@ def pdf_filler_tool():
             "Owner State":           row.get("Owner State", ""),
             "Scope":                 row.get("Scope", ""),
         }
+        print("PDF fields mapped:", fields)
 
         # --- Fill the PDF Form ---
         pdf_template = "Demo_permit.pdf"  # Ensure this file exists in the project folder
         output_pdf = "filled_permit.pdf"   # Output file
 
+        print("Reading PDF template...")
         reader = PdfReader(pdf_template)
         writer = PdfWriter()
 
@@ -84,15 +94,18 @@ def pdf_filler_tool():
 
         # Update the fields on the first page
         writer.update_page_form_field_values(writer.pages[0], fields)
+        print("PDF fields updated.")
 
         # Write to a new PDF file
         with open(output_pdf, "wb") as output_file:
             writer.write(output_file)
+        print("Filled PDF saved as:", output_pdf)
 
         return jsonify({"message": f"✅ PDF has been filled and saved as: {output_pdf}"}), 200
 
     except Exception as e:
-        print("Error:", traceback.format_exc())  # Print the full error traceback
+        # Print the full error traceback for debugging purposes
+        print("Error:", traceback.format_exc())
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
