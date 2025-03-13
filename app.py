@@ -104,9 +104,12 @@ def pdf_filler_tool():
         return jsonify({"message": f"✅ PDF has been filled and saved as: {output_pdf}"}), 200
 
     except Exception as e:
-        error_message = traceback.format_exc()  # Get full error details
-        print(f"❌ ERROR TRACEBACK:\n{error_message}")  # Print error in Cloud Run logs
-        return jsonify({"error": str(e), "traceback": error_message}), 500
+        error_message = traceback.format_exc()  # Capture the full error traceback
+        print("❌ ERROR TRACEBACK:\n", error_message)  # Print full traceback
+        return jsonify({
+        "error": str(e),
+        "traceback": error_message
+    }), 500
     
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
