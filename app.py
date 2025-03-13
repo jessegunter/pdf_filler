@@ -7,7 +7,7 @@ from pypdf.generic import NameObject
 import os
 import json
 import base64
-
+import traceback
 
 app = Flask(__name__)
 
@@ -92,6 +92,7 @@ def pdf_filler_tool():
         return jsonify({"message": f"✅ PDF has been filled and saved as: {output_pdf}"}), 200
 
     except Exception as e:
+        print("Error:", traceback.format_exc())  # Print the full error traceback
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
